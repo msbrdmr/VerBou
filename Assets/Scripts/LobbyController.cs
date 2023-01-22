@@ -178,4 +178,16 @@ public class LobbyController : MonoBehaviour
     }
 
 
+
+    //func to run startgame from Network manager
+    public void startGame(string scenename)
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        LocalPlayerController.canStartGame(scenename);
+    }
+
+
+
 }

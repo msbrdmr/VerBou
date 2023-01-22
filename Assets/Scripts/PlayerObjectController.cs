@@ -15,7 +15,11 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool isReady;
 
 
-
+    private void Start()
+    {
+        DontDestroyOnLoad(this.gameObject);
+        //when scene changes, keep all the playerobjectcontroller (player) active.
+    }
     private CustomNetworkManager manager;
     private CustomNetworkManager Manager
     {
@@ -90,5 +94,22 @@ public class PlayerObjectController : NetworkBehaviour
         {
             CmdSetReadyValue();
         }
+    }
+
+
+    public void canStartGame(string scenename)//this is client
+    {
+        if (isOwned)
+        {
+            CmdCanStartGame(scenename); // client runs this line, calls Command method.
+            //Command Method will run on the server
+        }
+    }
+
+
+    [Command]
+    public void CmdCanStartGame(string scenename)
+    {
+        manager.startGame(scenename);
     }
 }

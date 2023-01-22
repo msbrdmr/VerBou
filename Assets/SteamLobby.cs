@@ -36,6 +36,9 @@ public class SteamLobby : MonoBehaviour
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, manager.maxConnections);
     }
 
+    public void JoinLobby(){
+
+    }
 
     private void OnLobbyCreated(LobbyCreated_t callback)
     {
@@ -56,7 +59,6 @@ public class SteamLobby : MonoBehaviour
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
         //Say I am trying to join a lobby. Steam will run this func with that callback.
         // I need to run joinlobby with the steam lobby id (id of the owner) data from callback.
-
     }
     private void OnLobbyEntered(LobbyEnter_t callback)
     {

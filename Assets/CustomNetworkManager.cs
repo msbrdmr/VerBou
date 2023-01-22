@@ -10,6 +10,7 @@ public class CustomNetworkManager : NetworkManager
     [SerializeField] private PlayerObjectController GamePlayerPrefab;
     public List<PlayerObjectController> GamePlayers { get; } = new List<PlayerObjectController>();
 
+
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
         if (SceneManager.GetActiveScene().name == "Lobby")
@@ -22,8 +23,13 @@ public class CustomNetworkManager : NetworkManager
 
             NetworkServer.AddPlayerForConnection(conn, GamePlayerInstance.gameObject);
         }
-
-
-
     }
+    public void startGame(string scenename)
+    {
+        //SceneManager.LoadScene(scenename);
+        ServerChangeScene(scenename);//sync all clients scene change
+    }
+
+
 }
+
