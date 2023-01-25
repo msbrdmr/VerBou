@@ -520,7 +520,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 715921228}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &715921230
 Camera:
   m_ObjectHideFlags: 0
@@ -1451,7 +1451,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2034118884}
   m_HandleRect: {fileID: 2034118883}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
