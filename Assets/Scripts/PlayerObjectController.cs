@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using UnityEngine.SceneManagement;
 using Mirror;
 using Steamworks;
-using System;
 
 public class PlayerObjectController : NetworkBehaviour
 {
@@ -111,5 +108,30 @@ public class PlayerObjectController : NetworkBehaviour
     public void CmdCanStartGame(string scenename)
     {
         manager.startGame(scenename);
+    }
+
+    
+
+    public void Quit()
+    {
+        //Set the offline scene to null
+        manager.offlineScene = "";
+
+        //Make the active scene the offline scene
+        SceneManager.LoadScene("MainMenu");
+
+        //Leave Steam Lobby
+
+        if (isOwned)
+        {
+            if (isServer)
+            {
+                manager.StopHost();
+            }
+            else
+            {
+                manager.StopClient();
+            }
+        }
     }
 }

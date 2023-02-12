@@ -8,15 +8,18 @@ using Mirror;
 
 public class PlayerMoveController : NetworkBehaviour
 {
-    public float walkingSpeed = 7.5f;
-    public float runningSpeed = 11.5f;
+    public float walkingSpeed = 1.8f;
+    public float runningSpeed = 3.6f;
     public float jumpSpeed = 8.0f;
     public float gravity = 20.0f;
     public Camera playerCamera;
+    public GameObject CamComponentModel;
+    public List<GameObject> BodyAnimatingParts;
     public float lookSpeed = 2.0f;
-    public float lookXLimit = 45.0f;
+    public float lookXLimit = 75.0f;
     // [SerializeField] private GameObject playerModel;
-
+    public Animator animatorSYNC;
+    public Animator animatorHands;
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
@@ -29,22 +32,32 @@ public class PlayerMoveController : NetworkBehaviour
         characterController = GetComponent<CharacterController>();
         // playerModel.SetActive(false);
         // Dont Lock cursor
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        // Cursor.lockState = CursorLockMode.Locked;
+        // Cursor.visible = false;
 
-        if (!isLocalPlayer)
+        if (!isLocalPlayer)//if not me, for other players
         {
             playerCamera.gameObject.SetActive(false);
+            //disable camera component
+            CamComponentModel.SetActive(false);
+
+        }
+        else //if thats me
+        {
+
+            foreach (GameObject item in BodyAnimatingParts)
+            {
+                item.SetActive(false);
+            }
 
         }
         setPos();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (SceneManager.GetActiveScene().name == "Game")
         {
-            // if (!playerModel.activeSelf) { setPos(); playerModel.SetActive(true); }
             if (!isLocalPlayer) { return; }
             // We are grounded, so recalculate move direction based on axes
             Vector3 forward = transform.TransformDirection(Vector3.forward);
@@ -55,6 +68,8 @@ public class PlayerMoveController : NetworkBehaviour
             float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
             float movementDirectionY = moveDirection.y;
             moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+            moveDirection = Vector3.ClampMagnitude(moveDirection, walkingSpeed);
+
 
             if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
             {
@@ -70,11 +85,28 @@ public class PlayerMoveController : NetworkBehaviour
             // as an acceleration (ms^-2)
             if (!characterController.isGrounded)
             {
-                moveDirection.y -= gravity * Time.deltaTime;
+                moveDirection.y -= gravity * Time.fixedDeltaTime;
             }
 
+            // Debug.Log("SpeedX: " + curSpeedX + " SpeedY: " + curSpeedY);
+            if (curSpeedX != 0 || curSpeedY != 0)
+            {
+                animatorSYNC.SetBool("IsMoving", true);
+                // animatorHands.SetBool("Walking", true);
+            }
+            else
+            {
+                // animatorSYNC.SetBool("IsMoving", false);
+                // animatorHands.SetBool("Walking", false);
+            }
             // Move the controller
-            characterController.Move(moveDirection * Time.deltaTime);
+
+            animatorSYNC.SetFloat("SpeedX", curSpeedX / walkingSpeed, 0.1f, Time.fixedDeltaTime);
+            animatorSYNC.SetFloat("SpeedY", curSpeedY / walkingSpeed, 0.1f, Time.fixedDeltaTime);
+            animatorHands.SetFloat("Speed", curSpeedX);
+
+            characterController.Move(moveDirection * Time.fixedDeltaTime);
+
 
             // Player and Camera rotation
             if (canMove)

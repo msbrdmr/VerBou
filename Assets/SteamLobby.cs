@@ -5,6 +5,7 @@ using Mirror;
 using Steamworks;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class SteamLobby : MonoBehaviour
 {
@@ -13,6 +14,13 @@ public class SteamLobby : MonoBehaviour
     protected Callback<LobbyCreated_t> LobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> JoinRequest;
     protected Callback<LobbyEnter_t> LobbyEnter;
+
+    //Lobby Fetch Callbacks
+
+    protected Callback<LobbyMatchList_t> LobbyList;
+    protected Callback<LobbyDataUpdate_t> LobbyDataUpdated;
+    public List<CSteamID> ListOfAllActiveLobbies = new List<CSteamID>();
+
 
     //Variables
     public ulong CurrentLobbyID;
@@ -29,15 +37,44 @@ public class SteamLobby : MonoBehaviour
         LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
         JoinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequested);
         LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+        LobbyList = Callback<LobbyMatchList_t>.Create(OnGetLobbyList);
+        LobbyDataUpdated = Callback<LobbyDataUpdate_t>.Create(OnGetLobbyData);
+    }
+
+    public void GetLobbiesList()
+    {
+        if (ListOfAllActiveLobbies.Count > 0)
+        {
+            ListOfAllActiveLobbies.Clear();
+        }
+
+        SteamMatchmaking.AddRequestLobbyListResultCountFilter(60);
+        SteamMatchmaking.RequestLobbyList();
+    }
+    void OnGetLobbyList(LobbyMatchList_t result)
+    {
+        if (LobbiesListManager.instance.ListOfLobbies.Count > 0) { LobbiesListManager.instance.DestroyLobbies(); }
+        for (int i = 0; i < result.m_nLobbiesMatching; i++)
+        {
+            CSteamID LobbyID = SteamMatchmaking.GetLobbyByIndex(i);
+            ListOfAllActiveLobbies.Add(LobbyID);
+
+            SteamMatchmaking.RequestLobbyData(LobbyID);
+        }
+    }
+    void OnGetLobbyData(LobbyDataUpdate_t result)
+    {
+        LobbiesListManager.instance.DisplayLobbies(ListOfAllActiveLobbies, result);
     }
 
     public void HostLobby()
     {
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, manager.maxConnections);
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, manager.maxConnections);
     }
 
-    public void JoinLobby(){
-
+    public void JoinLobby(CSteamID lobbyID)
+    {
+        SteamMatchmaking.JoinLobby(lobbyID);
     }
 
     private void OnLobbyCreated(LobbyCreated_t callback)
@@ -65,11 +102,12 @@ public class SteamLobby : MonoBehaviour
         //For Everyone including host to enter lobby
         //only for clients
         CurrentLobbyID = callback.m_ulSteamIDLobby;
-        if (NetworkServer.active) { return; } 
+        if (NetworkServer.active) { return; }
         // This line checks if we are a host or not. If we are host, then our NetworkServer.active is true but if we are not, we are client. Then we can enter the lobby.
         //if we are client, we need to get the host address of the lobby we are trying to join
-        string to_join_host_address = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby),HostAddressKey);
+        string to_join_host_address = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey);
         manager.networkAddress = to_join_host_address;// Here, I am setting the networkaddress of our networkmanager which is the address that i am going to connect to.
         manager.StartClient();
     }
+
 }

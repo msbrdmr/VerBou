@@ -7,6 +7,7 @@ using Steamworks;
 using TMPro;
 using System.Linq;
 using System;
+using UnityEngine.SceneManagement;
 
 public class LobbyController : MonoBehaviour
 {
@@ -42,6 +43,7 @@ public class LobbyController : MonoBehaviour
     {
         if (instance == null) { instance = this; }
     }
+
     public void ReadyPlayer()
     {
         LocalPlayerController.changeReady();
@@ -188,6 +190,11 @@ public class LobbyController : MonoBehaviour
         LocalPlayerController.canStartGame(scenename);
     }
 
+
+    public void QuitLobby()
+    {
+        LocalPlayerController.Quit();
+    }
 
 
 }
