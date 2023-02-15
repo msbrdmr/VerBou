@@ -19,13 +19,13 @@ public class PlayerShootController : NetworkBehaviour
         if (isLocalPlayer && Input.GetMouseButtonDown(0))
         {
             //shoot
-            Shoot();
+            CmdShoot();
 
         }
     }
 
-
-    public void Shoot()
+    [Command]
+    public void CmdShoot()
     {
         RaycastHit hit;
         if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
